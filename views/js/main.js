@@ -1,3 +1,4 @@
+'use strict';
 /*
 Welcome to the 60fps project! Your goal is to make Cam's Pizzeria website run
 jank-free at 60 frames per second.
@@ -285,6 +286,7 @@ function generator(adj, noun) {
   var nouns = getNoun(noun);
   var randomAdjective = parseInt(Math.random() * adjectives.length);
   var randomNoun = parseInt(Math.random() * nouns.length);
+  // moved capitalization from JS to CSS (text transform)
   var name = "The " + adjectives[randomAdjective] + " " + nouns[randomNoun];
   return name;
 }
@@ -417,39 +419,35 @@ var resizePizzas = function(size) {
 
   changeSliderLabel(size);
 
-   // Returns the size difference to change a pizza element from one size to another. Called by changePizzaSlices(size).
-  function determineDx (elem, size) {
-    var oldWidth = elem.offsetWidth;
-    var windowWidth = document.querySelector("#randomPizzas").offsetWidth;
-    var oldSize = oldWidth / windowWidth;
-
-    // Changes the slider value to a percent width
-    function sizeSwitcher (size) {
-      switch(size) {
-        case "1":
-          return 0.25;
-        case "2":
-          return 0.3333;
-        case "3":
-          return 0.5;
-        default:
-          console.log("bug in sizeSwitcher");
-      }
-    }
-
-    var newSize = sizeSwitcher(size);
-    var dx = (newSize - oldSize) * windowWidth;
-
-    return dx;
-  }
-
   // Iterates through pizza elements on the page and changes their widths
   function changePizzaSizes(size) {
-    for (var i = 0; i < document.querySelectorAll(".randomPizzaContainer").length; i++) {
-      var dx = determineDx(document.querySelectorAll(".randomPizzaContainer")[i], size);
-      var newwidth = (document.querySelectorAll(".randomPizzaContainer")[i].offsetWidth + dx) + 'px';
-      document.querySelectorAll(".randomPizzaContainer")[i].style.width = newwidth;
-    }
+      var newWidth;
+      // case values are for % of image source
+      switch (size) {
+          case "1":
+              newWidth = 25;
+              break;
+          case "2":
+              newWidth = 33.33;
+              break;
+          case "3":
+              newWidth = 50;
+              break;
+          default:
+              console.log("bug in sizeSwitcher");
+      }
+
+      // NOTE: optimization using 'getElementsByClassName' rather then slower 'querySelectorAll'
+      // also taking the object collection and its computing its length outside of
+      //the for loop, so they are only done once on the function call.
+      // removed the determineDx function
+
+      var randomPizzas = document.getElementsByClassName("randomPizzaContainer");
+      var randomPizzasLength = randomPizzas.length;
+
+      for (var i = 0; i < randomPizzasLength; i++) {
+          randomPizzas[i].style.width = newWidth + "%";
+      }
   }
 
   changePizzaSizes(size);
@@ -463,10 +461,15 @@ var resizePizzas = function(size) {
 
 window.performance.mark("mark_start_generating"); // collect timing data
 
-// This for-loop actually creates and appends all of the pizzas when the page loads
+// This for-loop actually creates and appends the pizza elements when the page loads
+// 100 random pizzas generated for page
+
+// NOTE: optimization by moving this line out of the for loop
+var pizzasDiv = document.getElementById("randomPizzas");
+
+//pizza elements 0 .. 1 are hand coded in pizza.html
 for (var i = 2; i < 100; i++) {
-  var pizzasDiv = document.getElementById("randomPizzas");
-  pizzasDiv.appendChild(pizzaElementGenerator(i));
+    pizzasDiv.appendChild(pizzaElementGenerator(i));
 }
 
 // User Timing API again. These measurements tell you how long it took to generate the initial pizzas
