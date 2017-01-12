@@ -29,6 +29,10 @@ form {
   font-weight: 800;
 }
 
+.pizzaTitle  {
+  text-transform: capitalize;
+}
+
 .mover {
   position: fixed;
   width: 256px;
