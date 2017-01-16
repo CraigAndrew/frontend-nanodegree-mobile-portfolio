@@ -524,6 +524,34 @@ function updatePositions() {
     }
 }
 
+// Moves the sliding background pizzas based on scroll position
+function updatePositions() {
+    frame++;
+    window.performance.mark("mark_start_frame");
+
+    //calls document.body.scrollTop just once instead of each cycle through the loop
+    var theScrollTop = document.body.scrollTop;
+
+    //switched to using getElementsByClassName instead of querySelectorAll
+    var items = document.getElementsByClassName('mover');
+
+    for (var i = 0; i < items.length; i++) {
+        //using transform instead of using style.left to change position.
+        var phase = Math.sin((theScrollTop / 1250) + (i % 5));
+        var newPos = items[i].basicLeft + 100 * phase - 600 + 'px';
+        items[i].style.transform = "translateX(" + newPos + ")";
+    }
+
+    // User Timing API to the rescue again. Seriously, it's worth learning.
+    // Super easy to create custom metrics.
+    window.performance.mark("mark_end_frame");
+    window.performance.measure("measure_frame_duration", "mark_start_frame", "mark_end_frame");
+    if (frame % 10 === 0) {
+        var timesToUpdatePosition = window.performance.getEntriesByName("measure_frame_duration");
+        logAverageFrame(timesToUpdatePosition);
+    }
+}
+
 // runs updatePositions on scroll
 window.addEventListener('scroll', updatePositions);
 
